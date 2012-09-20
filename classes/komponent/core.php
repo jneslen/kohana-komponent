@@ -35,34 +35,38 @@ class Komponent_Core {
 
 	public function replace(\Darth\Model\Content $content)
 	{
-
 		foreach($this->_components as $component)
 		{
-			switch($component->type)
+			//Only run the component switch if the component name is present in the content
+			if(strpos($content->content, $component->name) !== false)
 			{
-				case 'model':
+				switch($component->type)
+				{
+					//TODO: define model component actions
+					case 'model':
 
-					break;
-				case 'method':
-					$mycontroller = $component->directory ? 'Controller_'.ucfirst($component->directory).'_'.ucfirst($component->controller) : 'Controller_'.ucfirst($component->controller);
-					$controller = new $mycontroller(\Request::current(), \Response::factory());
-					$replacement = $controller->{$component->method}();
-					$content->content = str_replace($component->name, $replacement, $content->content);
-					break;
-				case 'view':
-					if($component->language)
-					{
-						$replacement = \View::factory($component->view, array('language' => true));
-					}
-					else
-					{
-						$replacement = \View::factory($component->view);
-					}
-					$content->content = str_replace($component->name, $replacement, $content->content);
-					break;
-				case 'content':
-					$content->content = str_replace($component->name, $component->content, $content->content);
-					break;
+						break;
+					case 'method':
+						$mycontroller = $component->directory ? 'Controller_'.ucfirst($component->directory).'_'.ucfirst($component->controller) : 'Controller_'.ucfirst($component->controller);
+						$controller = new $mycontroller(\Request::current(), \Response::factory());
+						$replacement = $controller->{$component->method}($component->vars);
+						$content->content = str_replace($component->name, $replacement, $content->content);
+						break;
+					case 'view':
+						if($component->language)
+						{
+							$replacement = \View::factory($component->view, array('language' => true));
+						}
+						else
+						{
+							$replacement = \View::factory($component->view);
+						}
+						$content->content = str_replace($component->name, $replacement, $content->content);
+						break;
+					case 'content':
+						$content->content = str_replace($component->name, $component->content, $content->content);
+						break;
+				}
 			}
 		}
 
